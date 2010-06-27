@@ -71,9 +71,6 @@ static void period_certification(void);
   #include "SFMT-sse2.h"
 #endif
 
-/* originally this was a function to deal with the ONLY64 mode */
-#define idxof(idx) (idx)
-
 /**
  * This function simulates SIMD 128-bit right shift by the standard C.
  * The 128-bit integer given in in is shifted by (shift * 8) bits.
@@ -240,7 +237,7 @@ static void period_certification(void) {
     uint32_t work;
 
     for (i = 0; i < 4; i++)
-	inner ^= psfmt32[idxof(i)] & parity[i];
+	inner ^= psfmt32[i] & parity[i];
     for (i = 16; i > 0; i >>= 1)
 	inner ^= inner >> i;
     inner &= 1;
@@ -253,7 +250,7 @@ static void period_certification(void) {
 	work = 1;
 	for (j = 0; j < 32; j++) {
 	    if ((work & parity[i]) != 0) {
-		psfmt32[idxof(i)] ^= work;
+		psfmt32[i] ^= work;
 		return;
 	    }
 	    work = work << 1;
@@ -343,10 +340,10 @@ void fill_array32(uint32_t *array, int size) {
 void init_gen_rand(uint32_t seed) {
     int i;
 
-    psfmt32[idxof(0)] = seed;
+    psfmt32[0] = seed;
     for (i = 1; i < N32; i++) {
-	psfmt32[idxof(i)] = 1812433253UL * (psfmt32[idxof(i - 1)] 
-					    ^ (psfmt32[idxof(i - 1)] >> 30))
+	psfmt32[i] = 1812433253UL * (psfmt32[i - 1] 
+					    ^ (psfmt32[i - 1] >> 30))
 	    + i;
     }
     idx = N32;
@@ -384,39 +381,39 @@ void init_by_array(uint32_t *init_key, int key_length) {
     } else {
 	count = N32;
     }
-    r = func1(psfmt32[idxof(0)] ^ psfmt32[idxof(mid)] 
-	      ^ psfmt32[idxof(N32 - 1)]);
-    psfmt32[idxof(mid)] += r;
+    r = func1(psfmt32[0] ^ psfmt32[mid] 
+	      ^ psfmt32[N32 - 1]);
+    psfmt32[mid] += r;
     r += key_length;
-    psfmt32[idxof(mid + lag)] += r;
-    psfmt32[idxof(0)] = r;
+    psfmt32[mid + lag] += r;
+    psfmt32[0] = r;
 
     count--;
     for (i = 1, j = 0; (j < count) && (j < key_length); j++) {
-	r = func1(psfmt32[idxof(i)] ^ psfmt32[idxof((i + mid) % N32)] 
-		  ^ psfmt32[idxof((i + N32 - 1) % N32)]);
-	psfmt32[idxof((i + mid) % N32)] += r;
+	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
+		  ^ psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] += r;
 	r += init_key[j] + i;
-	psfmt32[idxof((i + mid + lag) % N32)] += r;
-	psfmt32[idxof(i)] = r;
+	psfmt32[(i + mid + lag) % N32] += r;
+	psfmt32[i] = r;
 	i = (i + 1) % N32;
     }
     for (; j < count; j++) {
-	r = func1(psfmt32[idxof(i)] ^ psfmt32[idxof((i + mid) % N32)] 
-		  ^ psfmt32[idxof((i + N32 - 1) % N32)]);
-	psfmt32[idxof((i + mid) % N32)] += r;
+	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
+		  ^ psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] += r;
 	r += i;
-	psfmt32[idxof((i + mid + lag) % N32)] += r;
-	psfmt32[idxof(i)] = r;
+	psfmt32[(i + mid + lag) % N32] += r;
+	psfmt32[i] = r;
 	i = (i + 1) % N32;
     }
     for (j = 0; j < N32; j++) {
-	r = func2(psfmt32[idxof(i)] + psfmt32[idxof((i + mid) % N32)] 
-		  + psfmt32[idxof((i + N32 - 1) % N32)]);
-	psfmt32[idxof((i + mid) % N32)] ^= r;
+	r = func2(psfmt32[i] + psfmt32[(i + mid) % N32] 
+		  + psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] ^= r;
 	r -= i;
-	psfmt32[idxof((i + mid + lag) % N32)] ^= r;
-	psfmt32[idxof(i)] = r;
+	psfmt32[(i + mid + lag) % N32] ^= r;
+	psfmt32[i] = r;
 	i = (i + 1) % N32;
     }
 
