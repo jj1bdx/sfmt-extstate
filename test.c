@@ -26,6 +26,7 @@ void check32(void);
 void speed32(void);
 void check64(void);
 void speed64(void);
+void paramdump(void);
 
 #if defined(HAVE_ALTIVEC)
 static vector unsigned int array1[BLOCK_SIZE / 4];
@@ -266,11 +267,33 @@ void speed64(void) {
 	   BLOCK_SIZE64 * COUNT);
 }
 
+void paramdump(void) {
+    printf("MEXP = %d\n", MEXP);
+    printf("N = %d\n", N);
+    printf("N32 = %d\n", N32);
+    printf("N64 = %d\n", N64);
+    printf("POS1 = %d\n", POS1);
+    printf("SL1 = %d\n", SL1);
+    printf("SL2 = %d\n", SL2);
+    printf("SR1 = %d\n", SR1);
+    printf("SR2 = %d\n", SR2);
+    printf("MSK1 = %#010xU\n", MSK1);
+    printf("MSK2 = %#010xU\n", MSK2);
+    printf("MSK3 = %#010xU\n", MSK3);
+    printf("MSK4 = %#010xU\n", MSK4);
+    printf("PARITY1 = %#010xU\n", PARITY1);
+    printf("PARITY2 = %#010xU\n", PARITY2);
+    printf("PARITY3 = %#010xU\n", PARITY3);
+    printf("PARITY4 = %#010xU\n", PARITY4);
+    printf("IDSTR = %s\n", IDSTR);
+}
+
 int main(int argc, char *argv[]) {
     int i;
     int speed = 0;
     int bit64 = 0;
     int bit32 = 0;
+    int param = 0;
 
     for (i = 1; i < argc; i++) {
 	if (strncmp(argv[1],"-s", 2) == 0) {
@@ -282,9 +305,12 @@ int main(int argc, char *argv[]) {
 	if (strncmp(argv[1],"-b32", 4) == 0) {
 	    bit32 = 1;
 	}
+	if (strncmp(argv[1],"-p", 2) == 0) {
+	    param = 1;
+	}
     }
-    if (speed + bit32 + bit64 == 0) {
-	printf("usage:\n%s [-s | -b32 | -b64]\n", argv[0]);
+    if (speed + bit32 + bit64 + param == 0) {
+	printf("usage:\n%s [-s | -b32 | -b64 | -p]\n", argv[0]);
 	return 0;
     }
     if (speed) {
@@ -295,6 +321,9 @@ int main(int argc, char *argv[]) {
     }
     if (bit64) {
 	check64();
+    }
+    if (param) {
+	paramdump();
     }
     return 0;
 }
