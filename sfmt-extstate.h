@@ -32,6 +32,7 @@
 #define SFMT_H
 
 #include <stdio.h>
+#include "sfmt-params-M19937.h"
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <inttypes.h>
@@ -72,11 +73,34 @@
   #define PRE_ALWAYS inline
 #endif
 
-uint32_t gen_rand32(void);
-void fill_array32(uint32_t *array, int size);
-void init_gen_rand(uint32_t seed);
-void init_by_array(uint32_t *init_key, int key_length);
-const char *get_idstring(void);
-int get_min_array_size32(void);
+/*------------------------------------------------------
+  128-bit SIMD data type for SSE2 or standard C
+  ------------------------------------------------------*/
+#if defined(HAVE_SSE2)
+  #include <emmintrin.h>
+
+/** 128-bit data structure */
+union W128_T {
+    __m128i si;
+    uint32_t u[4];
+};
+/** 128-bit data type */
+typedef union W128_T w128_t;
+
+#else /* HAVE_SSE2 */
+
+/** 128-bit data structure */
+struct W128_T {
+    uint32_t u[4];
+};
+/** 128-bit data type */
+typedef struct W128_T w128_t;
+
+#endif /* HAVE_SSE2 */
+
+/* public functions for the state tables */
+void gen_rand_all(w128_t *intstate);
+void gen_rand_array(w128_t *array, int size, w128_t *intstate);
+void period_certification(w128_t *intstate);
 
 #endif /* SFMT_H */

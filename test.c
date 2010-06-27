@@ -15,16 +15,26 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include "SFMT.c"
+#include <string.h>
+#include <assert.h>
+#include "sfmt-extstate.h"
 
 #define BLOCK_SIZE 100000
 #define BLOCK_SIZE64 50000
 #define COUNT 1000
 
+uint32_t gen_rand32(void);
+void fill_array32(uint32_t *array, int size);
+void init_gen_rand(uint32_t seed);
+void init_by_array(uint32_t *init_key, int key_length);
+const char *get_idstring(void);
+int get_min_array_size32(void);
 void check32(void);
 void speed32(void);
 void paramdump(void);
+/* common prototypes */
+inline static uint32_t func1(uint32_t x);
+inline static uint32_t func2(uint32_t x);
 
 #if defined(HAVE_SSE2)
 static __m128i array1[BLOCK_SIZE / 4];
@@ -34,6 +44,200 @@ static uint64_t array1[BLOCK_SIZE / 4][2];
 static uint64_t array2[10000 / 4][2];
 #endif
 
+/*--------------------------------------
+  FILE GLOBAL VARIABLES
+  internal state, index counter and flag 
+  --------------------------------------*/
+/** the 128-bit internal state array */
+static w128_t sfmt[N];
+/** the 32bit integer pointer to the 128-bit internal state array */
+static uint32_t *psfmt32 = &sfmt[0].u[0];
+/** index counter to the 32-bit internal state array */
+static int idx;
+/** a flag: it is 0 if and only if the internal state is not yet
+ * initialized. */
+static int initialized = 0;
+
+/**
+ * This function represents a function used in the initialization
+ * by init_by_array
+ * @param x 32-bit integer
+ * @return 32-bit integer
+ */
+inline static uint32_t func1(uint32_t x) {
+    return (x ^ (x >> 27)) * (uint32_t)1664525UL;
+}
+
+/**
+ * This function represents a function used in the initialization
+ * by init_by_array
+ * @param x 32-bit integer
+ * @return 32-bit integer
+ */
+inline static uint32_t func2(uint32_t x) {
+    return (x ^ (x >> 27)) * (uint32_t)1566083941UL;
+}
+
+/**
+ * This function returns the identification string.
+ * The string shows the word size, the Mersenne exponent,
+ * and all parameters of this generator.
+ */
+const char *get_idstring(void) {
+    return IDSTR;
+}
+
+/**
+ * This function returns the minimum size of array used for \b
+ * fill_array32() function.
+ * @return minimum size of array used for fill_array32() function.
+ */
+int get_min_array_size32(void) {
+    return N32;
+}
+
+/**
+ * This function generates and returns 32-bit pseudorandom number.
+ * init_gen_rand or init_by_array must be called before this function.
+ * @return 32-bit pseudorandom number
+ */
+inline uint32_t gen_rand32(void) {
+    uint32_t r;
+
+    assert(initialized);
+    if (idx >= N32) {
+	gen_rand_all(&sfmt[0]);
+	idx = 0;
+    }
+    r = psfmt32[idx++];
+    return r;
+}
+
+/**
+ * This function generates pseudorandom 32-bit integers in the
+ * specified array[] by one call. The number of pseudorandom integers
+ * is specified by the argument size, which must be at least 624 and a
+ * multiple of four.  The generation by this function is much faster
+ * than the following gen_rand function.
+ *
+ * For initialization, init_gen_rand or init_by_array must be called
+ * before the first call of this function. This function can not be
+ * used after calling gen_rand function, without initialization.
+ *
+ * @param array an array where pseudorandom 32-bit integers are filled
+ * by this function.  The pointer to the array must be \b "aligned"
+ * (namely, must be a multiple of 16) in the SIMD version, since it
+ * refers to the address of a 128-bit integer.  In the standard C
+ * version, the pointer is arbitrary.
+ *
+ * @param size the number of 32-bit pseudorandom integers to be
+ * generated.  size must be a multiple of 4, and greater than or equal
+ * to (MEXP / 128 + 1) * 4.
+ *
+ * @note \b memalign or \b posix_memalign is available to get aligned
+ * memory. Mac OSX doesn't have these functions, but \b malloc of OSX
+ * returns the pointer to the aligned memory block.
+ */
+void fill_array32(uint32_t *array, int size) {
+    assert(initialized);
+    assert(idx == N32);
+    assert(size % 4 == 0);
+    assert(size >= N32);
+
+    gen_rand_array((w128_t *)array, size / 4, &sfmt[0]);
+    idx = N32;
+}
+
+/**
+ * This function initializes the internal state array with a 32-bit
+ * integer seed.
+ *
+ * @param seed a 32-bit integer used as the seed.
+ */
+void init_gen_rand(uint32_t seed) {
+    int i;
+
+    psfmt32[0] = seed;
+    for (i = 1; i < N32; i++) {
+	psfmt32[i] = 1812433253UL * (psfmt32[i - 1] 
+					    ^ (psfmt32[i - 1] >> 30))
+	    + i;
+    }
+    idx = N32;
+    period_certification(&sfmt[0]);
+    initialized = 1;
+}
+
+/**
+ * This function initializes the internal state array,
+ * with an array of 32-bit integers used as the seeds
+ * @param init_key the array of 32-bit integers, used as a seed.
+ * @param key_length the length of init_key.
+ */
+void init_by_array(uint32_t *init_key, int key_length) {
+    int i, j, count;
+    uint32_t r;
+    int lag;
+    int mid;
+    int size = N * 4;
+
+    if (size >= 623) {
+	lag = 11;
+    } else if (size >= 68) {
+	lag = 7;
+    } else if (size >= 39) {
+	lag = 5;
+    } else {
+	lag = 3;
+    }
+    mid = (size - lag) / 2;
+
+    memset(sfmt, 0x8b, sizeof(sfmt));
+    if (key_length + 1 > N32) {
+	count = key_length + 1;
+    } else {
+	count = N32;
+    }
+    r = func1(psfmt32[0] ^ psfmt32[mid] 
+	      ^ psfmt32[N32 - 1]);
+    psfmt32[mid] += r;
+    r += key_length;
+    psfmt32[mid + lag] += r;
+    psfmt32[0] = r;
+
+    count--;
+    for (i = 1, j = 0; (j < count) && (j < key_length); j++) {
+	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
+		  ^ psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] += r;
+	r += init_key[j] + i;
+	psfmt32[(i + mid + lag) % N32] += r;
+	psfmt32[i] = r;
+	i = (i + 1) % N32;
+    }
+    for (; j < count; j++) {
+	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
+		  ^ psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] += r;
+	r += i;
+	psfmt32[(i + mid + lag) % N32] += r;
+	psfmt32[i] = r;
+	i = (i + 1) % N32;
+    }
+    for (j = 0; j < N32; j++) {
+	r = func2(psfmt32[i] + psfmt32[(i + mid) % N32] 
+		  + psfmt32[(i + N32 - 1) % N32]);
+	psfmt32[(i + mid) % N32] ^= r;
+	r -= i;
+	psfmt32[(i + mid + lag) % N32] ^= r;
+	psfmt32[i] = r;
+	i = (i + 1) % N32;
+    }
+
+    idx = N32;
+    period_certification(&sfmt[0]);
+    initialized = 1;
+}
 void check32(void) {
     int i;
     uint32_t *array32 = (uint32_t *)array1;
