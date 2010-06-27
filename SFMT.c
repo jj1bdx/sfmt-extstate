@@ -18,9 +18,7 @@
 #if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
 #define BIG_ENDIAN64 1
 #endif
-#if defined(HAVE_ALTIVEC) && !defined(BIG_ENDIAN64)
-#define BIG_ENDIAN64 1
-#endif
+
 #if defined(ONLY64) && !defined(BIG_ENDIAN64)
   #if defined(__GNUC__)
     #error "-DONLY64 must be specified with -DBIG_ENDIAN64"
@@ -28,21 +26,9 @@
 #undef ONLY64
 #endif
 /*------------------------------------------------------
-  128-bit SIMD data type for Altivec, SSE2 or standard C
+  128-bit SIMD data type for SSE2 or standard C
   ------------------------------------------------------*/
-#if defined(HAVE_ALTIVEC)
-  #if !defined(__APPLE__)
-    #include <altivec.h>
-  #endif
-/** 128-bit data structure */
-union W128_T {
-    vector unsigned int s;
-    uint32_t u[4];
-};
-/** 128-bit data type */
-typedef union W128_T w128_t;
-
-#elif defined(HAVE_SSE2)
+#if defined(HAVE_SSE2)
   #include <emmintrin.h>
 
 /** 128-bit data structure */
@@ -99,9 +85,7 @@ static void period_certification(void);
 inline static void swap(w128_t *array, int size);
 #endif
 
-#if defined(HAVE_ALTIVEC)
-  #include "SFMT-alti.h"
-#elif defined(HAVE_SSE2)
+#if defined(HAVE_SSE2)
   #include "SFMT-sse2.h"
 #endif
 
@@ -205,7 +189,7 @@ inline static void lshift128(w128_t *out, w128_t const *in, int shift) {
  * @param c a 128-bit part of the internal state array
  * @param d a 128-bit part of the internal state array
  */
-#if (!defined(HAVE_ALTIVEC)) && (!defined(HAVE_SSE2))
+#if (!defined(HAVE_SSE2))
 #ifdef ONLY64
 inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
 				w128_t *d) {
@@ -243,7 +227,7 @@ inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
 #endif
 #endif
 
-#if (!defined(HAVE_ALTIVEC)) && (!defined(HAVE_SSE2))
+#if (!defined(HAVE_SSE2))
 /**
  * This function fills the internal state array with pseudorandom
  * integers.
@@ -306,7 +290,7 @@ inline static void gen_rand_array(w128_t *array, int size) {
 }
 #endif
 
-#if defined(BIG_ENDIAN64) && !defined(ONLY64) && !defined(HAVE_ALTIVEC)
+#if defined(BIG_ENDIAN64) && !defined(ONLY64)
 inline static void swap(w128_t *array, int size) {
     int i;
     uint32_t x, y;
