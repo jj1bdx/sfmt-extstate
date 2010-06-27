@@ -33,8 +33,8 @@ CCFLAGS = $(OPTI) $(WARN) $(STD)
 SSE2FLAGS = -msse2 -DHAVE_SSE2
 STD_TARGET = test-std-M19937
 SSE2_TARGET = test-sse2-M19937
-ALL_STD_TARGET = test-std-M607 test-std-M19937
-ALL_SSE2_TARGET = test-sse2-M607 test-sse2-M19937
+ALL_STD_TARGET = ${STD_TARGET}
+ALL_SSE2_TARGET = ${SSE2_TARGET}
 # ==========================================================
 # comment out or EDIT following lines to get max performance
 # ==========================================================
@@ -67,19 +67,13 @@ all: std sse2 std-check sse2-check
 
 std: ${STD_TARGET}
 
-sse2:${SSE2_TARGET}
+sse2: ${SSE2_TARGET}
 
 std-check: ${ALL_STD_TARGET}
 	./check.sh 32 test-std
 
 sse2-check: ${ALL_SSE2_TARGET}
 	./check.sh 32 test-sse2
-
-test-std-M607: test.c SFMT.c SFMT.h SFMT-params607.h
-	${CC} ${CCFLAGS} -DMEXP=607 -o $@ test.c
-
-test-sse2-M607: test.c SFMT.c SFMT.h SFMT-sse2.h SFMT-params607.h
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=607 -o $@ test.c
 
 test-std-M19937: test.c SFMT.c SFMT.h SFMT-params19937.h
 	${CC} ${CCFLAGS} -DMEXP=19937 -o $@ test.c

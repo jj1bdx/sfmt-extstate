@@ -3,7 +3,7 @@ bit_len=$1
 prefix=$2
 tmp=tmp.$$
 tmp64=tmp64.$$
-exps="607 19937"
+exps="19937"
 for mexp in $exps; do
     if [ $bit_len = "64" ]; then
 	./test-std-M${mexp} -b64 > $tmp64
