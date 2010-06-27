@@ -15,10 +15,6 @@
 #include "SFMT.h"
 #include "SFMT-params-M19937.h"
 
-#if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
-#define BIG_ENDIAN64 1
-#endif
-
 /*------------------------------------------------------
   128-bit SIMD data type for SSE2 or standard C
   ------------------------------------------------------*/
@@ -52,10 +48,6 @@ typedef struct W128_T w128_t;
 static w128_t sfmt[N];
 /** the 32bit integer pointer to the 128-bit internal state array */
 static uint32_t *psfmt32 = &sfmt[0].u[0];
-#if !defined(BIG_ENDIAN64)
-/** the 64bit integer pointer to the 128-bit internal state array */
-static uint64_t *psfmt64 = (uint64_t *)&sfmt[0].u[0];
-#endif
 /** index counter to the 32-bit internal state array */
 static int idx;
 /** a flag: it is 0 if and only if the internal state is not yet
@@ -74,9 +66,6 @@ inline static void gen_rand_array(w128_t *array, int size);
 inline static uint32_t func1(uint32_t x);
 inline static uint32_t func2(uint32_t x);
 static void period_certification(void);
-#if defined(BIG_ENDIAN64)
-inline static void swap(w128_t *array, int size);
-#endif
 
 #if defined(HAVE_SSE2)
   #include "SFMT-sse2.h"
@@ -222,21 +211,6 @@ inline static void gen_rand_array(w128_t *array, int size) {
 }
 #endif
 
-#if defined(BIG_ENDIAN64)
-inline static void swap(w128_t *array, int size) {
-    int i;
-    uint32_t x, y;
-
-    for (i = 0; i < size; i++) {
-	x = array[i].u[0];
-	y = array[i].u[2];
-	array[i].u[0] = array[i].u[1];
-	array[i].u[2] = array[i].u[3];
-	array[i].u[1] = x;
-	array[i].u[3] = y;
-    }
-}
-#endif
 /**
  * This function represents a function used in the initialization
  * by init_by_array
@@ -335,39 +309,6 @@ uint32_t gen_rand32(void) {
 }
 
 /**
- * This function generates and returns 64-bit pseudorandom number.
- * init_gen_rand or init_by_array must be called before this function.
- * The function gen_rand64 should not be called after gen_rand32,
- * unless an initialization is again executed. 
- * @return 64-bit pseudorandom number
- */
-uint64_t gen_rand64(void) {
-#if defined(BIG_ENDIAN64)
-    uint32_t r1, r2;
-#else
-    uint64_t r;
-#endif
-
-    assert(initialized);
-    assert(idx % 2 == 0);
-
-    if (idx >= N32) {
-	gen_rand_all();
-	idx = 0;
-    }
-#if defined(BIG_ENDIAN64)
-    r1 = psfmt32[idx];
-    r2 = psfmt32[idx + 1];
-    idx += 2;
-    return ((uint64_t)r2 << 32) | r1;
-#else
-    r = psfmt64[idx / 2];
-    idx += 2;
-    return r;
-#endif
-}
-
-/**
  * This function generates pseudorandom 32-bit integers in the
  * specified array[] by one call. The number of pseudorandom integers
  * is specified by the argument size, which must be at least 624 and a
@@ -400,45 +341,6 @@ void fill_array32(uint32_t *array, int size) {
 
     gen_rand_array((w128_t *)array, size / 4);
     idx = N32;
-}
-
-/**
- * This function generates pseudorandom 64-bit integers in the
- * specified array[] by one call. The number of pseudorandom integers
- * is specified by the argument size, which must be at least 312 and a
- * multiple of two.  The generation by this function is much faster
- * than the following gen_rand function.
- *
- * For initialization, init_gen_rand or init_by_array must be called
- * before the first call of this function. This function can not be
- * used after calling gen_rand function, without initialization.
- *
- * @param array an array where pseudorandom 64-bit integers are filled
- * by this function.  The pointer to the array must be "aligned"
- * (namely, must be a multiple of 16) in the SIMD version, since it
- * refers to the address of a 128-bit integer.  In the standard C
- * version, the pointer is arbitrary.
- *
- * @param size the number of 64-bit pseudorandom integers to be
- * generated.  size must be a multiple of 2, and greater than or equal
- * to (MEXP / 128 + 1) * 2
- *
- * @note \b memalign or \b posix_memalign is available to get aligned
- * memory. Mac OSX doesn't have these functions, but \b malloc of OSX
- * returns the pointer to the aligned memory block.
- */
-void fill_array64(uint64_t *array, int size) {
-    assert(initialized);
-    assert(idx == N32);
-    assert(size % 2 == 0);
-    assert(size >= N64);
-
-    gen_rand_array((w128_t *)array, size / 2);
-    idx = N32;
-
-#if defined(BIG_ENDIAN64)
-    swap((w128_t *)array, size /2);
-#endif
 }
 
 /**

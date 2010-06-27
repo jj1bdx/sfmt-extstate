@@ -24,8 +24,6 @@
 
 void check32(void);
 void speed32(void);
-void check64(void);
-void speed64(void);
 void paramdump(void);
 
 #if defined(HAVE_SSE2)
@@ -148,122 +146,6 @@ void speed32(void) {
 	   BLOCK_SIZE * COUNT);
 }
 
-void check64(void) {
-    int i;
-    uint64_t *array64;
-    uint64_t *array64_2;
-    uint64_t r;
-    uint32_t ini[] = {5, 4, 3, 2, 1};
-
-    array64 = (uint64_t *)array1;
-    array64_2 = (uint64_t *)array2;
-    if (get_min_array_size64() > 5000) {
-	printf("array size too small!\n");
-	exit(1);
-    }
-    printf("%s\n64 bit generated randoms\n", get_idstring());
-    printf("init_gen_rand__________\n");
-    /* 64 bit generation */
-    init_gen_rand(4321);
-    fill_array64(array64, 5000);
-    fill_array64(array64_2, 5000);
-    init_gen_rand(4321);
-    for (i = 0; i < 5000; i++) {
-	if (i < 1000) {
-	    printf("%20"PRIu64" ", array64[i]);
-	    if (i % 3 == 2) {
-		printf("\n");
-	    }
-	}
-	r = gen_rand64();
-	if (r != array64[i]) {
-	    printf("\nmismatch at %d array64:%"PRIx64" gen:%"PRIx64"\n", 
-		   i, array64[i], r);
-	    exit(1);
-	}
-    }
-    printf("\n");
-    for (i = 0; i < 700; i++) {
-	r = gen_rand64();
-	if (r != array64_2[i]) {
-	    printf("\nmismatch at %d array64_2:%"PRIx64" gen:%"PRIx64"\n", 
-		   i, array64_2[i], r);
-	    exit(1);
-	}
-    }
-    printf("init_by_array__________\n");
-    /* 64 bit generation */
-    init_by_array(ini, 5);
-    fill_array64(array64, 5000);
-    fill_array64(array64_2, 5000);
-    init_by_array(ini, 5);
-    for (i = 0; i < 5000; i++) {
-	if (i < 1000) {
-	    printf("%20"PRIu64" ", array64[i]);
-	    if (i % 3 == 2) {
-		printf("\n");
-	    }
-	}
-	r = gen_rand64();
-	if (r != array64[i]) {
-	    printf("\nmismatch at %d array64:%"PRIx64" gen:%"PRIx64"\n", 
-		   i, array64[i], r);
-	    exit(1);
-	}
-    }
-    printf("\n");
-    for (i = 0; i < 700; i++) {
-	r = gen_rand64();
-	if (r != array64_2[i]) {
-	    printf("\nmismatch at %d array64_2:%"PRIx64" gen:%"PRIx64"\n", 
-		   i, array64_2[i], r);
-	    exit(1);
-	}
-    }
-}
-
-void speed64(void) {
-    int i, j;
-    uint64_t clo;
-    uint64_t min = LONG_MAX;
-    uint64_t *array64 = (uint64_t *)array1;
-
-    if (get_min_array_size64() > BLOCK_SIZE64) {
-	printf("array size too small!\n");
-	exit(1);
-    }
-    /* 64 bit generation */
-    init_gen_rand(1234);
-    for (i = 0; i < 10; i++) {
-	clo = clock();
-	for (j = 0; j < COUNT; j++) {
-	    fill_array64(array64, BLOCK_SIZE64);
-	}
-	clo = clock() - clo;
-	if (clo < min) {
-	    min = clo;
-	}
-    }
-    printf("64 bit BLOCK:%.0f", (double)min * 1000/ CLOCKS_PER_SEC);
-    printf("ms for %u randoms generation\n",
-	   BLOCK_SIZE64 * COUNT);
-    min = LONG_MAX;
-    init_gen_rand(1234);
-    for (i = 0; i < 10; i++) {
-	clo = clock();
-	for (j = 0; j < BLOCK_SIZE64 * COUNT; j++) {
-	    gen_rand64();
-	}
-	clo = clock() - clo;
-	if (clo < min) {
-	    min = clo;
-	}
-    }
-    printf("64 bit SEQUE:%.0f", (double)min * 1000 / CLOCKS_PER_SEC);
-    printf("ms for %u randoms generation\n",
-	   BLOCK_SIZE64 * COUNT);
-}
-
 void paramdump(void) {
     printf("MEXP = %d\n", MEXP);
     printf("N = %d\n", N);
@@ -288,16 +170,12 @@ void paramdump(void) {
 int main(int argc, char *argv[]) {
     int i;
     int speed = 0;
-    int bit64 = 0;
     int bit32 = 0;
     int param = 0;
 
     for (i = 1; i < argc; i++) {
 	if (strncmp(argv[1],"-s", 2) == 0) {
 	    speed = 1;
-	}
-	if (strncmp(argv[1],"-b64", 4) == 0) {
-	    bit64 = 1;
 	}
 	if (strncmp(argv[1],"-b32", 4) == 0) {
 	    bit32 = 1;
@@ -306,8 +184,8 @@ int main(int argc, char *argv[]) {
 	    param = 1;
 	}
     }
-    if (speed + bit32 + bit64 + param == 0) {
-	printf("usage:\n%s [-s | -b32 | -b64 | -p]\n", argv[0]);
+    if (speed + bit32 + param == 0) {
+	printf("usage:\n%s [-s | -b32 | -p]\n", argv[0]);
 	return 0;
     }
     if (speed) {
@@ -315,9 +193,6 @@ int main(int argc, char *argv[]) {
     }
     if (bit32) {
 	check32();
-    }
-    if (bit64) {
-	check64();
     }
     if (param) {
 	paramdump();
