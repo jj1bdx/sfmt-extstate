@@ -53,14 +53,9 @@ static int idx;
 /** a flag: it is 0 if and only if the internal state is not yet
  * initialized. */
 static int initialized = 0;
-/** a parity check vector which certificate the period of 2^{MEXP} */
-static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
-
 /*----------------
   STATIC FUNCTIONS
   ----------------*/
-inline static void rshift128(w128_t *out,  w128_t const *in, int shift);
-inline static void lshift128(w128_t *out,  w128_t const *in, int shift);
 inline static void gen_rand_all(void);
 inline static void gen_rand_array(w128_t *array, int size);
 inline static uint32_t func1(uint32_t x);
@@ -68,8 +63,115 @@ inline static uint32_t func2(uint32_t x);
 static void period_certification(void);
 
 #if defined(HAVE_SSE2)
-  #include "SFMT-sse2.h"
-#endif
+
+/* SSE2 assembly language code */
+
+PRE_ALWAYS static __m128i mm_recursion(__m128i *a, __m128i *b, __m128i c,
+				   __m128i d, __m128i mask) ALWAYSINLINE;
+
+/**
+ * This function represents the recursion formula.
+ * @param a a 128-bit part of the interal state array
+ * @param b a 128-bit part of the interal state array
+ * @param c a 128-bit part of the interal state array
+ * @param d a 128-bit part of the interal state array
+ * @param mask 128-bit mask
+ * @return output
+ */
+PRE_ALWAYS static __m128i mm_recursion(__m128i *a, __m128i *b, 
+				   __m128i c, __m128i d, __m128i mask) {
+    __m128i v, x, y, z;
+    
+    x = _mm_load_si128(a);
+    y = _mm_srli_epi32(*b, SR1);
+    z = _mm_srli_si128(c, SR2);
+    v = _mm_slli_epi32(d, SL1);
+    z = _mm_xor_si128(z, x);
+    z = _mm_xor_si128(z, v);
+    x = _mm_slli_si128(x, SL2);
+    y = _mm_and_si128(y, mask);
+    z = _mm_xor_si128(z, x);
+    z = _mm_xor_si128(z, y);
+    return z;
+}
+
+/**
+ * This function fills the internal state array with pseudorandom
+ * integers.
+ */
+inline static void gen_rand_all(void) {
+    int i;
+    __m128i r, r1, r2, mask;
+    mask = _mm_set_epi32(MSK4, MSK3, MSK2, MSK1);
+
+    r1 = _mm_load_si128(&sfmt[N - 2].si);
+    r2 = _mm_load_si128(&sfmt[N - 1].si);
+    for (i = 0; i < N - POS1; i++) {
+	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1].si, r1, r2, mask);
+	_mm_store_si128(&sfmt[i].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+    for (; i < N; i++) {
+	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1 - N].si, r1, r2, mask);
+	_mm_store_si128(&sfmt[i].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+}
+
+/**
+ * This function fills the user-specified array with pseudorandom
+ * integers.
+ *
+ * @param array an 128-bit array to be filled by pseudorandom numbers.  
+ * @param size number of 128-bit pesudorandom numbers to be generated.
+ */
+inline static void gen_rand_array(w128_t *array, int size) {
+    int i, j;
+    __m128i r, r1, r2, mask;
+    mask = _mm_set_epi32(MSK4, MSK3, MSK2, MSK1);
+
+    r1 = _mm_load_si128(&sfmt[N - 2].si);
+    r2 = _mm_load_si128(&sfmt[N - 1].si);
+    for (i = 0; i < N - POS1; i++) {
+	r = mm_recursion(&sfmt[i].si, &sfmt[i + POS1].si, r1, r2, mask);
+	_mm_store_si128(&array[i].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+    for (; i < N; i++) {
+	r = mm_recursion(&sfmt[i].si, &array[i + POS1 - N].si, r1, r2, mask);
+	_mm_store_si128(&array[i].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+    /* main loop */
+    for (; i < size - N; i++) {
+	r = mm_recursion(&array[i - N].si, &array[i + POS1 - N].si, r1, r2,
+			 mask);
+	_mm_store_si128(&array[i].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+    for (j = 0; j < 2 * N - size; j++) {
+	r = _mm_load_si128(&array[j + size - N].si);
+	_mm_store_si128(&sfmt[j].si, r);
+    }
+    for (; i < size; i++) {
+	r = mm_recursion(&array[i - N].si, &array[i + POS1 - N].si, r1, r2,
+			 mask);
+	_mm_store_si128(&array[i].si, r);
+	_mm_store_si128(&sfmt[j++].si, r);
+	r1 = r2;
+	r2 = r;
+    }
+}
+
+#else /* !HAVE_SSE2 */
+
+inline static void rshift128(w128_t *out,  w128_t const *in, int shift);
+inline static void lshift128(w128_t *out,  w128_t const *in, int shift);
 
 /**
  * This function simulates SIMD 128-bit right shift by the standard C.
@@ -126,7 +228,6 @@ inline static void lshift128(w128_t *out, w128_t const *in, int shift) {
  * @param c a 128-bit part of the internal state array
  * @param d a 128-bit part of the internal state array
  */
-#if (!defined(HAVE_SSE2))
 inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
 				w128_t *d) {
     w128_t x;
@@ -143,9 +244,7 @@ inline static void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
     r->u[3] = a->u[3] ^ x.u[3] ^ ((b->u[3] >> SR1) & MSK4) ^ y.u[3] 
 	^ (d->u[3] << SL1);
 }
-#endif
 
-#if (!defined(HAVE_SSE2))
 /**
  * This function fills the internal state array with pseudorandom
  * integers.
@@ -206,7 +305,8 @@ inline static void gen_rand_array(w128_t *array, int size) {
 	sfmt[j] = array[i];
     }
 }
-#endif
+
+#endif /* HAVE_SSE2 */
 
 /**
  * This function represents a function used in the initialization
@@ -214,7 +314,7 @@ inline static void gen_rand_array(w128_t *array, int size) {
  * @param x 32-bit integer
  * @return 32-bit integer
  */
-static uint32_t func1(uint32_t x) {
+inline static uint32_t func1(uint32_t x) {
     return (x ^ (x >> 27)) * (uint32_t)1664525UL;
 }
 
@@ -224,9 +324,12 @@ static uint32_t func1(uint32_t x) {
  * @param x 32-bit integer
  * @return 32-bit integer
  */
-static uint32_t func2(uint32_t x) {
+inline static uint32_t func2(uint32_t x) {
     return (x ^ (x >> 27)) * (uint32_t)1566083941UL;
 }
+
+/** a parity check vector which certificate the period of 2^{MEXP} */
+static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
 
 /**
  * This function certificate the period of 2^{MEXP}

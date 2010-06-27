@@ -78,8 +78,7 @@ sse2-check: ${ALL_SSE2_TARGET}
 test-std-M19937: test.c SFMT.c SFMT.h SFMT-params-M19937.h
 	${CC} ${CCFLAGS} -o $@ test.c
 
-test-sse2-M19937: test.c SFMT.c SFMT.h SFMT-sse2.h \
-	SFMT-params-M19937.h
+test-sse2-M19937: test.c SFMT.c SFMT.h SFMT-params-M19937.h
 	${CC} ${CCFLAGS} ${SSE2FLAGS} -o $@ test.c
 
 clean:
