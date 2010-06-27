@@ -150,7 +150,6 @@ void paramdump(void) {
     printf("MEXP = %d\n", MEXP);
     printf("N = %d\n", N);
     printf("N32 = %d\n", N32);
-    printf("N64 = %d\n", N64);
     printf("POS1 = %d\n", POS1);
     printf("SL1 = %d\n", SL1);
     printf("SL2 = %d\n", SL2);

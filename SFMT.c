@@ -283,15 +283,6 @@ int get_min_array_size32(void) {
 }
 
 /**
- * This function returns the minimum size of array used for \b
- * fill_array64() function.
- * @return minimum size of array used for fill_array64() function.
- */
-int get_min_array_size64(void) {
-    return N64;
-}
-
-/**
  * This function generates and returns 32-bit pseudorandom number.
  * init_gen_rand or init_by_array must be called before this function.
  * @return 32-bit pseudorandom number
