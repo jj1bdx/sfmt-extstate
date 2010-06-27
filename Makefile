@@ -75,12 +75,12 @@ std-check: ${ALL_STD_TARGET}
 sse2-check: ${ALL_SSE2_TARGET}
 	./check.sh 32 test-sse2
 
-test-std-M19937: test.c SFMT.c SFMT.h SFMT-params19937.h
-	${CC} ${CCFLAGS} -DMEXP=19937 -o $@ test.c
+test-std-M19937: test.c SFMT.c SFMT.h SFMT-params-M19937.h
+	${CC} ${CCFLAGS} -o $@ test.c
 
 test-sse2-M19937: test.c SFMT.c SFMT.h SFMT-sse2.h \
-	SFMT-params19937.h
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=19937 -o $@ test.c
+	SFMT-params-M19937.h
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -o $@ test.c
 
 clean:
 	rm -f *.o *~ test-*

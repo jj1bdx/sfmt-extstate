@@ -13,7 +13,7 @@
 #include <string.h>
 #include <assert.h>
 #include "SFMT.h"
-#include "SFMT-params.h"
+#include "SFMT-params-M19937.h"
 
 #if defined(__BIG_ENDIAN__) && !defined(__amd64) && !defined(BIG_ENDIAN64)
 #define BIG_ENDIAN64 1
