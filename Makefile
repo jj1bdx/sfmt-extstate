@@ -32,10 +32,8 @@ CC = gcc44
 CCFLAGS = $(OPTI) $(WARN) $(STD)
 SSE2FLAGS = -msse2 -DHAVE_SSE2
 STD_TARGET = test-std-M19937
-BIG_TARGET = test-big64-M19937
 SSE2_TARGET = test-sse2-M19937
 ALL_STD_TARGET = test-std-M607 test-std-M19937
-ALL_BIG_TARGET = test-big64-M607 test-big64-M19937
 ALL_SSE2_TARGET = test-sse2-M607 test-sse2-M19937
 # ==========================================================
 # comment out or EDIT following lines to get max performance
@@ -71,16 +69,11 @@ std: ${STD_TARGET}
 
 sse2:${SSE2_TARGET}
 
-big:${BIG_TARGET}
-
 std-check: ${ALL_STD_TARGET}
 	./check.sh 32 test-std
 
 sse2-check: ${ALL_SSE2_TARGET}
 	./check.sh 32 test-sse2
-
-big-check: ${ALL_BIG_TARGET} ${ALL_STD_TARGET}
-	./check.sh 64 test-big64
 
 test-std-M607: test.c SFMT.c SFMT.h SFMT-params607.h
 	${CC} ${CCFLAGS} -DMEXP=607 -o $@ test.c
@@ -94,12 +87,6 @@ test-std-M19937: test.c SFMT.c SFMT.h SFMT-params19937.h
 test-sse2-M19937: test.c SFMT.c SFMT.h SFMT-sse2.h \
 	SFMT-params19937.h
 	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=19937 -o $@ test.c
-
-test-big64-M607: test.c SFMT.c SFMT.h SFMT-params607.h
-	${CC} ${CCFLAGS} -DONLY64 -DMEXP=607 -o $@ test.c
-
-test-big64-M19937: test.c SFMT.c SFMT.h SFMT-params19937.h
-	${CC} ${CCFLAGS} -DONLY64 -DMEXP=19937 -o $@ test.c
 
 clean:
 	rm -f *.o *~ test-*
