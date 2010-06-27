@@ -38,7 +38,6 @@ static uint64_t array1[BLOCK_SIZE / 4][2];
 static uint64_t array2[10000 / 4][2];
 #endif
 
-#ifndef ONLY64
 void check32(void) {
     int i;
     uint32_t *array32 = (uint32_t *)array1;
@@ -150,7 +149,6 @@ void speed32(void) {
     printf("ms for %u randoms generation\n",
 	   BLOCK_SIZE * COUNT);
 }
-#endif
 
 void check64(void) {
     int i;
@@ -272,9 +270,7 @@ int main(int argc, char *argv[]) {
     int i;
     int speed = 0;
     int bit64 = 0;
-#ifndef ONLY64
     int bit32 = 0;
-#endif
 
     for (i = 1; i < argc; i++) {
 	if (strncmp(argv[1],"-s", 2) == 0) {
@@ -283,34 +279,20 @@ int main(int argc, char *argv[]) {
 	if (strncmp(argv[1],"-b64", 4) == 0) {
 	    bit64 = 1;
 	}
-#ifndef ONLY64
 	if (strncmp(argv[1],"-b32", 4) == 0) {
 	    bit32 = 1;
 	}
-#endif
     }
-#ifdef ONLY64
-    if (speed + bit64 == 0) {
-	printf("usage:\n%s [-s | -b64]\n", argv[0]);
-	return 0;
-    }
-#else
     if (speed + bit32 + bit64 == 0) {
 	printf("usage:\n%s [-s | -b32 | -b64]\n", argv[0]);
 	return 0;
     }
-#endif
     if (speed) {
-#ifndef ONLY64
 	speed32();
-#endif
-	speed64();
     }
-#ifndef ONLY64
     if (bit32) {
 	check32();
     }
-#endif
     if (bit64) {
 	check64();
     }
