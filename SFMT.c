@@ -67,7 +67,6 @@ static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
 /*----------------
   STATIC FUNCTIONS
   ----------------*/
-inline static int idxof(int i);
 inline static void rshift128(w128_t *out,  w128_t const *in, int shift);
 inline static void lshift128(w128_t *out,  w128_t const *in, int shift);
 inline static void gen_rand_all(void);
@@ -83,14 +82,8 @@ inline static void swap(w128_t *array, int size);
   #include "SFMT-sse2.h"
 #endif
 
-/**
- * This function simulate a 64-bit index of LITTLE ENDIAN 
- * in BIG ENDIAN machine.
- * Note: ONLY64 option removed so this will be redundant
- */
-inline static int idxof(int i) {
-    return i;
-}
+/* originally this was a function to deal with the ONLY64 mode */
+#define idxof(idx) (idx)
 
 /**
  * This function simulates SIMD 128-bit right shift by the standard C.
