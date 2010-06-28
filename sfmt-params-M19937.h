@@ -1,5 +1,5 @@
-#ifndef SFMT_PARAMS19937_H
-#define SFMT_PARAMS19937_H
+#ifndef SFMT_PARAMS_M19937_H
+#define SFMT_PARAMS_M19937_H
 
 /** Mersenne Exponent. The period of the sequence 
  *  is a multiple of 2^MEXP-1. */
@@ -36,4 +36,4 @@
 /* identification string for the algorithm */
 #define IDSTR	"SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6"
 
-#endif /* SFMT_PARAMS19937_H */
+#endif /* SFMT_PARAMS_M19937_H */

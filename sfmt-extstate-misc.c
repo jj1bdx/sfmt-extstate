@@ -16,6 +16,8 @@
 
 /* public functions for the state tables */
 void period_certification(w128_t *intstate);
+const char *get_idstring(void);
+int get_min_array_size32(void);
 
 /** a parity check vector which certificate the period of 2^{MEXP} */
 static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
@@ -51,5 +53,23 @@ void period_certification(w128_t *intstate) {
 	    work = work << 1;
 	}
     }
+}
+
+/**
+ * This function returns the identification string.
+ * The string shows the word size, the Mersenne exponent,
+ * and all parameters of this generator.
+ */
+const char *get_idstring(void) {
+    return IDSTR;
+}
+
+/**
+ * This function returns the minimum size of array used for \b
+ * fill_array32() function.
+ * @return minimum size of array used for fill_array32() function.
+ */
+int get_min_array_size32(void) {
+    return N32;
 }
 

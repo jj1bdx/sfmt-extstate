@@ -27,8 +27,6 @@ uint32_t gen_rand32(void);
 void fill_array32(uint32_t *array, int size);
 void init_gen_rand(uint32_t seed);
 void init_by_array(uint32_t *init_key, int key_length);
-const char *get_idstring(void);
-int get_min_array_size32(void);
 void check32(void);
 void speed32(void);
 void paramdump(void);
@@ -76,24 +74,6 @@ inline static uint32_t func1(uint32_t x) {
  */
 inline static uint32_t func2(uint32_t x) {
     return (x ^ (x >> 27)) * (uint32_t)1566083941UL;
-}
-
-/**
- * This function returns the identification string.
- * The string shows the word size, the Mersenne exponent,
- * and all parameters of this generator.
- */
-const char *get_idstring(void) {
-    return IDSTR;
-}
-
-/**
- * This function returns the minimum size of array used for \b
- * fill_array32() function.
- * @return minimum size of array used for fill_array32() function.
- */
-int get_min_array_size32(void) {
-    return N32;
 }
 
 /**

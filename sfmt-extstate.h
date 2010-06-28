@@ -28,8 +28,8 @@
  * unsigned int and 64-bit unsigned int in hexadecimal format.
  */
 
-#ifndef SFMT_H
-#define SFMT_H
+#ifndef SFMT_EXTSTATE_H
+#define SFMT_EXTSTATE_H
 
 #include <stdio.h>
 #include "sfmt-params-M19937.h"
@@ -102,5 +102,7 @@ typedef struct W128_T w128_t;
 void gen_rand_all(w128_t *intstate);
 void gen_rand_array(w128_t *array, int size, w128_t *intstate);
 void period_certification(w128_t *intstate);
+const char *get_idstring(void);
+int get_min_array_size32(void);
 
-#endif /* SFMT_H */
+#endif /* SFMT_EXTSTATE_H */
