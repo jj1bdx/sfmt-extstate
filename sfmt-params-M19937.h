@@ -1,3 +1,10 @@
+/* This file is a part of sfmt-extstate */
+/* Copyright (C) 2010 Kenji Rikitake. All rights reserved. */
+/* Copyright (C) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima */
+/* University. All rights reserved. */
+/* The new BSD License is applied to this software. */
+/* See LICENSE.txt for the further details. */
+
 #ifndef SFMT_PARAMS_M19937_H
 #define SFMT_PARAMS_M19937_H
 

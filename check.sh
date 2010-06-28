@@ -1,4 +1,11 @@
 #!/bin/sh
+# This file is a part of sfmt-extstate
+# Copyright (C) 2010 Kenji Rikitake. All rights reserved.
+# Copyright (C) 2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
+# University. All rights reserved.
+# The new BSD License is applied to this software.
+# See LICENSE.txt for the further details.
+#
 bit_len=$1
 prefix=$2
 tmp=tmp.$$

@@ -1,3 +1,8 @@
+/* This file is a part of sfmt-extstate */
+/* Copyright (C) 2010 Kenji Rikitake. All rights reserved. */
+/* The new BSD License is applied to this software. */
+/* See LICENSE.txt for the further details. */
+
 /**
  * @file  test.c
  * @brief test program for 32-bit and 64-bit output of SFMT.
