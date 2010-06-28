@@ -75,13 +75,22 @@ std-check: ${ALL_STD_TARGET}
 sse2-check: ${ALL_SSE2_TARGET}
 	./check.sh 32 test-sse2
 
-test-std-M19937: test.c sfmt-extstate.c sfmt-extstate.h sfmt-params-M19937.h
-	${CC} ${CCFLAGS} -c sfmt-extstate.c
-	${CC} ${CCFLAGS} -o $@ test.c sfmt-extstate.o
+sfmt-extstate-misc.o: sfmt-extstate-misc.c sfmt-extstate.h sfmt-params-M19937.h
+	${CC} ${CCFLAGS} -c sfmt-extstate-misc.c
 
-test-sse2-M19937: test.c sfmt-extstate.c sfmt-extstate.h sfmt-params-M19937.h
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -c sfmt-extstate.c
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -o $@ test.c sfmt-extstate.o
+sfmt-extstate-std.o: sfmt-extstate-std.c sfmt-extstate.h sfmt-params-M19937.h
+	${CC} ${CCFLAGS} -c sfmt-extstate-std.c
+
+sfmt-extstate-sse2.o: sfmt-extstate-sse2.c sfmt-extstate.h sfmt-params-M19937.h
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -c sfmt-extstate-sse2.c
+
+test-std-M19937: test.c sfmt-extstate.h sfmt-params-M19937.h \
+		 sfmt-extstate-misc.o sfmt-extstate-std.o
+	${CC} ${CCFLAGS} -o $@ test.c sfmt-extstate-misc.o sfmt-extstate-std.o
+
+test-sse2-M19937: test.c sfmt-extstate.h sfmt-params-M19937.h \
+		 sfmt-extstate-misc.o sfmt-extstate-sse2.o
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -o $@ test.c sfmt-extstate-misc.o sfmt-extstate-sse2.o
 
 clean:
 	rm -f *.o *~ test-*
