@@ -36,10 +36,8 @@ STD = -std=c99
 CC = gcc44
 CCFLAGS = $(OPTI) $(WARN) $(STD)
 SSE2FLAGS = -msse2 -DHAVE_SSE2
-STD_TARGET = test-std-M19937
-SSE2_TARGET = test-sse2-M19937
-ALL_STD_TARGET = ${STD_TARGET}
-ALL_SSE2_TARGET = ${SSE2_TARGET}
+STD_TARGET = test-std-M19937 test-std-M216091
+SSE2_TARGET = test-sse2-M19937 test-sse2-M216091
 # ==========================================================
 # comment out or EDIT following lines to get max performance
 # ==========================================================
@@ -74,28 +72,61 @@ std: ${STD_TARGET}
 
 sse2: ${SSE2_TARGET}
 
-std-check: ${ALL_STD_TARGET}
+std-check: ${STD_TARGET}
 	./check.sh 32 test-std
 
-sse2-check: ${ALL_SSE2_TARGET}
+sse2-check: ${SSE2_TARGET}
 	./check.sh 32 test-sse2
 
-sfmt-extstate-misc.o: sfmt-extstate-misc.c sfmt-extstate.h sfmt-params-M19937.h
-	${CC} ${CCFLAGS} -c sfmt-extstate-misc.c
+sfmt-extstate-misc-M19937.o: sfmt-extstate-misc.c sfmt-extstate.h \
+	sfmt-params-M19937.h 
+	${CC} ${CCFLAGS} -DMEXP=19937 \
+	-o sfmt-extstate-misc-M19937.o -c sfmt-extstate-misc.c
 
-sfmt-extstate-std.o: sfmt-extstate-std.c sfmt-extstate.h sfmt-params-M19937.h
-	${CC} ${CCFLAGS} -c sfmt-extstate-std.c
+sfmt-extstate-std-M19937.o: sfmt-extstate-std.c sfmt-extstate.h \
+	sfmt-params-M19937.h
+	${CC} ${CCFLAGS} -DMEXP=19937 \
+	-o sfmt-extstate-std-M19937.o -c sfmt-extstate-std.c
 
-sfmt-extstate-sse2.o: sfmt-extstate-sse2.c sfmt-extstate.h sfmt-params-M19937.h
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -c sfmt-extstate-sse2.c
+sfmt-extstate-sse2-M19937.o: sfmt-extstate-sse2.c sfmt-extstate.h \
+	sfmt-params-M19937.h 
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=19937 \
+	-o sfmt-extstate-sse2-M19937.o -c sfmt-extstate-sse2.c
+
+sfmt-extstate-misc-M216091.o: sfmt-extstate-misc.c sfmt-extstate.h \
+	sfmt-params-M216091.h
+	${CC} ${CCFLAGS} -DMEXP=216091 \
+	-o sfmt-extstate-misc-M216091.o -c sfmt-extstate-misc.c
+
+sfmt-extstate-std-M216091.o: sfmt-extstate-std.c sfmt-extstate.h \
+	sfmt-params-M216091.h
+	${CC} ${CCFLAGS} -DMEXP=216091 \
+	-o sfmt-extstate-std-M216091.o -c sfmt-extstate-std.c
+
+sfmt-extstate-sse2-M216091.o: sfmt-extstate-sse2.c sfmt-extstate.h \
+	sfmt-params-M216091.h
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=216091 \
+	-o sfmt-extstate-sse2-M216091.o -c sfmt-extstate-sse2.c
 
 test-std-M19937: test.c sfmt-extstate.h sfmt-params-M19937.h \
-		 sfmt-extstate-misc.o sfmt-extstate-std.o
-	${CC} ${CCFLAGS} -o $@ test.c sfmt-extstate-misc.o sfmt-extstate-std.o
+		 sfmt-extstate-misc-M19937.o sfmt-extstate-std-M19937.o
+	${CC} ${CCFLAGS} -DMEXP=19937 -o $@ test.c \
+	sfmt-extstate-misc-M19937.o sfmt-extstate-std-M19937.o
 
 test-sse2-M19937: test.c sfmt-extstate.h sfmt-params-M19937.h \
-		 sfmt-extstate-misc.o sfmt-extstate-sse2.o
-	${CC} ${CCFLAGS} ${SSE2FLAGS} -o $@ test.c sfmt-extstate-misc.o sfmt-extstate-sse2.o
+		 sfmt-extstate-misc-M19937.o sfmt-extstate-sse2-M19937.o
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=19937 -o $@ test.c \
+	sfmt-extstate-misc-M19937.o sfmt-extstate-sse2-M19937.o
+
+test-std-M216091: test.c sfmt-extstate.h sfmt-params-M216091.h \
+		 sfmt-extstate-misc-M216091.o sfmt-extstate-std-M216091.o
+	${CC} ${CCFLAGS} -DMEXP=216091 -o $@ test.c \
+	sfmt-extstate-misc-M216091.o sfmt-extstate-std-M216091.o
+
+test-sse2-M216091: test.c sfmt-extstate.h sfmt-params-M216091.h \
+		 sfmt-extstate-misc-M216091.o sfmt-extstate-sse2-M216091.o
+	${CC} ${CCFLAGS} ${SSE2FLAGS} -DMEXP=216091 -o $@ test.c \
+	sfmt-extstate-misc-M216091.o sfmt-extstate-sse2-M216091.o
 
 clean:
 	rm -f *.o *~ test-*

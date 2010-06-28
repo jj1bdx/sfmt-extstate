@@ -37,7 +37,25 @@
 #define SFMT_EXTSTATE_H
 
 #include <stdio.h>
-#include "sfmt-params-M19937.h"
+#if !defined(MEXP)
+#ifdef __GNUC__
+#warning "MEXP is not defined. I assume MEXP is 19937."
+#endif /* __GNUC-- */
+#define MEXP 19937
+#endif /* !defined(MEXP) */
+
+#if MEXP == 19937
+  #include "sfmt-params-M19937.h"
+#elif MEXP == 216091
+  #include "sfmt-params-M216091.h"
+#else
+#ifdef __GNUC__
+  #error "MEXP is not valid."
+  #undef MEXP
+#else
+  #undef MEXP
+#endif /* __GNUC__ */
+#endif /* MEXP */
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
   #include <inttypes.h>
