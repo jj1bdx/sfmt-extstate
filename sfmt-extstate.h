@@ -104,5 +104,7 @@ void gen_rand_array(w128_t *array, int size, w128_t *intstate);
 void period_certification(w128_t *intstate);
 const char *get_idstring(void);
 int get_min_array_size32(void);
+void init_gen_rand(uint32_t seed, w128_t *intstate);
+void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
 #endif /* SFMT_EXTSTATE_H */

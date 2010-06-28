@@ -25,14 +25,9 @@
 
 uint32_t gen_rand32(void);
 void fill_array32(uint32_t *array, int size);
-void init_gen_rand(uint32_t seed);
-void init_by_array(uint32_t *init_key, int key_length);
 void check32(void);
 void speed32(void);
 void paramdump(void);
-/* common prototypes */
-inline static uint32_t func1(uint32_t x);
-inline static uint32_t func2(uint32_t x);
 
 #if defined(HAVE_SSE2)
 static __m128i array1[BLOCK_SIZE / 4];
@@ -55,26 +50,6 @@ static int idx;
 /** a flag: it is 0 if and only if the internal state is not yet
  * initialized. */
 static int initialized = 0;
-
-/**
- * This function represents a function used in the initialization
- * by init_by_array
- * @param x 32-bit integer
- * @return 32-bit integer
- */
-inline static uint32_t func1(uint32_t x) {
-    return (x ^ (x >> 27)) * (uint32_t)1664525UL;
-}
-
-/**
- * This function represents a function used in the initialization
- * by init_by_array
- * @param x 32-bit integer
- * @return 32-bit integer
- */
-inline static uint32_t func2(uint32_t x) {
-    return (x ^ (x >> 27)) * (uint32_t)1566083941UL;
-}
 
 /**
  * This function generates and returns 32-bit pseudorandom number.
@@ -128,96 +103,6 @@ void fill_array32(uint32_t *array, int size) {
     idx = N32;
 }
 
-/**
- * This function initializes the internal state array with a 32-bit
- * integer seed.
- *
- * @param seed a 32-bit integer used as the seed.
- */
-void init_gen_rand(uint32_t seed) {
-    int i;
-
-    psfmt32[0] = seed;
-    for (i = 1; i < N32; i++) {
-	psfmt32[i] = 1812433253UL * (psfmt32[i - 1] 
-					    ^ (psfmt32[i - 1] >> 30))
-	    + i;
-    }
-    idx = N32;
-    period_certification(&sfmt[0]);
-    initialized = 1;
-}
-
-/**
- * This function initializes the internal state array,
- * with an array of 32-bit integers used as the seeds
- * @param init_key the array of 32-bit integers, used as a seed.
- * @param key_length the length of init_key.
- */
-void init_by_array(uint32_t *init_key, int key_length) {
-    int i, j, count;
-    uint32_t r;
-    int lag;
-    int mid;
-    int size = N * 4;
-
-    if (size >= 623) {
-	lag = 11;
-    } else if (size >= 68) {
-	lag = 7;
-    } else if (size >= 39) {
-	lag = 5;
-    } else {
-	lag = 3;
-    }
-    mid = (size - lag) / 2;
-
-    memset(sfmt, 0x8b, sizeof(sfmt));
-    if (key_length + 1 > N32) {
-	count = key_length + 1;
-    } else {
-	count = N32;
-    }
-    r = func1(psfmt32[0] ^ psfmt32[mid] 
-	      ^ psfmt32[N32 - 1]);
-    psfmt32[mid] += r;
-    r += key_length;
-    psfmt32[mid + lag] += r;
-    psfmt32[0] = r;
-
-    count--;
-    for (i = 1, j = 0; (j < count) && (j < key_length); j++) {
-	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
-		  ^ psfmt32[(i + N32 - 1) % N32]);
-	psfmt32[(i + mid) % N32] += r;
-	r += init_key[j] + i;
-	psfmt32[(i + mid + lag) % N32] += r;
-	psfmt32[i] = r;
-	i = (i + 1) % N32;
-    }
-    for (; j < count; j++) {
-	r = func1(psfmt32[i] ^ psfmt32[(i + mid) % N32] 
-		  ^ psfmt32[(i + N32 - 1) % N32]);
-	psfmt32[(i + mid) % N32] += r;
-	r += i;
-	psfmt32[(i + mid + lag) % N32] += r;
-	psfmt32[i] = r;
-	i = (i + 1) % N32;
-    }
-    for (j = 0; j < N32; j++) {
-	r = func2(psfmt32[i] + psfmt32[(i + mid) % N32] 
-		  + psfmt32[(i + N32 - 1) % N32]);
-	psfmt32[(i + mid) % N32] ^= r;
-	r -= i;
-	psfmt32[(i + mid + lag) % N32] ^= r;
-	psfmt32[i] = r;
-	i = (i + 1) % N32;
-    }
-
-    idx = N32;
-    period_certification(&sfmt[0]);
-    initialized = 1;
-}
 void check32(void) {
     int i;
     uint32_t *array32 = (uint32_t *)array1;
@@ -232,10 +117,18 @@ void check32(void) {
     printf("%s\n32 bit generated randoms\n", get_idstring());
     printf("init_gen_rand__________\n");
     /* 32 bit generation */
-    init_gen_rand(1234);
+    {
+    	init_gen_rand(1234, &sfmt[0]); 
+	idx = N32;
+	initialized = 1;
+    }
     fill_array32(array32, 10000);
     fill_array32(array32_2, 10000);
-    init_gen_rand(1234);
+    {
+    	init_gen_rand(1234, &sfmt[0]); 
+	idx = N32;
+	initialized = 1;
+    }
     for (i = 0; i < 10000; i++) {
 	if (i < 1000) {
 	    printf("%10u ", array32[i]);
@@ -259,11 +152,19 @@ void check32(void) {
 	}
     }
     printf("\n");
-    init_by_array(ini, 4);
+    {
+	init_by_array(ini, 4, &sfmt[0]);
+	idx = N32;
+	initialized = 1;
+    }
     printf("init_by_array__________\n");
     fill_array32(array32, 10000);
     fill_array32(array32_2, 10000);
-    init_by_array(ini, 4);
+    {
+	init_by_array(ini, 4, &sfmt[0]);
+	idx = N32;
+	initialized = 1;
+    }
     for (i = 0; i < 10000; i++) {
 	if (i < 1000) {
 	    printf("%10u ", array32[i]);
@@ -299,7 +200,11 @@ void speed32(void) {
 	exit(1);
     }
     /* 32 bit generation */
-    init_gen_rand(1234);
+    {
+    	init_gen_rand(1234, &sfmt[0]); 
+	idx = N32;
+	initialized = 1;
+    }
     for (i = 0; i < 10; i++) {
 	clo = clock();
 	for (j = 0; j < COUNT; j++) {
@@ -314,7 +219,11 @@ void speed32(void) {
     printf("ms for %u randoms generation\n",
 	   BLOCK_SIZE * COUNT);
     min = LONG_MAX;
-    init_gen_rand(1234);
+    {
+    	init_gen_rand(1234, &sfmt[0]); 
+	idx = N32;
+	initialized = 1;
+    }
     for (i = 0; i < 10; i++) {
 	clo = clock();
 	for (j = 0; j < BLOCK_SIZE * COUNT; j++) {
@@ -348,6 +257,7 @@ void paramdump(void) {
     printf("PARITY3 = %#010xU\n", PARITY3);
     printf("PARITY4 = %#010xU\n", PARITY4);
     printf("IDSTR = %s\n", IDSTR);
+    printf("sizeof(sfmt) = %d\n", sizeof(sfmt));
 }
 
 int main(int argc, char *argv[]) {
