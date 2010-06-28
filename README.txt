@@ -32,6 +32,7 @@ The (modified) BSD License is applied to this software, see LICENSE.txt
 
  * SFMT RNG period is fixed to ((2^19937)-1). Parameters of
    the original SFMT-1.3.3 code are applicable with little modification.
+   (Code also tested with the ((2^216091)-1) RNG period.)
 
  * 64-bit RNG support is removed to simplify the internal state
    handling.  Mixing up 32- and 64-bit RNG generations can be fatal
