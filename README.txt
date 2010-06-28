@@ -1,8 +1,10 @@
-sfmt-extstate: SFMT C functions with the externalized state table
+* sfmt-extstate: SFMT C functions with the externalized state table
 
-Copyright (C) 2010 by Kenji Rikitake. All rights reserved.
+Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
+
+Copyright (C) 2010 by Kenji Rikitake. All rights reserved.
 
 The (modified) BSD License is applied to this software.
 If you want to redistribute and/or change source files, see LICENSE.txt.
@@ -20,3 +22,37 @@ University. All rights reserved.
 
 The (modified) BSD License is applied to this software, see LICENSE.txt
 =================================================================
+
+* Tested on FreeBSD/i386 7.3-RELEASE with 
+  gcc44 (GCC) 4.4.4 20100427 from the Port lang/gcc44.
+
+* Features removed
+
+ * AltIvec support is removed; no test environment.
+
+ * SFMT RNG period is fixed to ((2^19937)-1). Parameters of
+   the original SFMT-1.3.3 code are applicable with little modification.
+
+ * 64-bit RNG support is removed to simplify the internal state
+   handling.  Mixing up 32- and 64-bit RNG generations can be fatal
+   for the whole generation process.
+
+* Why externalized state table needed?
+
+The original SFMT code embedded the internal state table of SFMT as a
+static array; this made the whole code thread-unsafe and unable to be
+included into other pieces of software such as a part of Erlang
+linked-in drivers.
+
+In the functions of sfmt-extstate-*.c, the programmers need to
+explicitly pass the pointer of the SFMT internal state table.  This will
+allow the programmers to separate the memory regions for the state
+tables when multiple instances of SFMT generators are concurrently
+running.
+
+* TODO
+
+ * Documentation (including source code comments) cleanup
+
+[End of README.txt]
+
