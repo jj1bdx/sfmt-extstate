@@ -60,6 +60,7 @@ PRE_ALWAYS __m128i mm_recursion(__m128i *a, __m128i *b,
 /**
  * This function fills the internal state array with pseudorandom
  * integers.
+ * @param intstate internal state array
  */
 inline void gen_rand_all(w128_t *intstate) {
     int i;
@@ -88,6 +89,7 @@ inline void gen_rand_all(w128_t *intstate) {
  *
  * @param array an 128-bit array to be filled by pseudorandom numbers.  
  * @param size number of 128-bit pesudorandom numbers to be generated.
+ * @param intstate internal state array
  */
 inline void gen_rand_array(w128_t *array, int size, w128_t *intstate) {
     int i, j;

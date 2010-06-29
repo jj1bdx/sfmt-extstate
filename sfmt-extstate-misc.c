@@ -35,6 +35,7 @@ static uint32_t parity[4] = {PARITY1, PARITY2, PARITY3, PARITY4};
 
 /**
  * This function certificate the period of 2^{MEXP}
+ * @param intstate internal state array
  */
 void period_certification(w128_t *intstate) {
     int inner = 0;
@@ -111,6 +112,7 @@ inline static uint32_t func2(uint32_t x) {
  * array is correctly initialized.
  *
  * @param seed a 32-bit integer used as the seed.
+ * @param intstate internal state array
  */
 void init_gen_rand(uint32_t seed, w128_t *intstate) {
     int i;
@@ -136,6 +138,7 @@ void init_gen_rand(uint32_t seed, w128_t *intstate) {
  *
  * @param init_key the array of 32-bit integers, used as a seed.
  * @param key_length the length of init_key.
+ * @param intstate internal state array
  */
 void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate) {
     int i, j, count;
