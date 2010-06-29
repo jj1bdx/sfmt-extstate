@@ -1,9 +1,26 @@
 /* This file is a part of sfmt-extstate */
-/* Copyright (C) 2010 Kenji Rikitake. All rights reserved. */
-/* Copyright (C) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima */
-/* University. All rights reserved. */
-/* The new BSD License is applied to this software. */
-/* See LICENSE.txt for the further details. */
+
+/** 
+ * @file sfmt-params-M19937.h
+ *
+ * @brief SFMT configuration file for a parameter set of
+ * period ((2^19937)-1)
+ *
+ * @author Mutsuo Saito (Hiroshima University)
+ * @author Makoto Matsumoto (Hiroshima University)
+ * @author Kenji Rikitake
+ *
+ * Copyright (C) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
+ * University. All rights reserved.
+ *
+ * Copyright (C) 2010 Kenji Rikitake. All rights reserved.
+ *
+ * The new BSD License is applied to this software.
+ * see LICENSE.txt
+ *
+ * @note Other sets of parameters are available from SFMT-1.3.3
+ * source code.
+ */
 
 #ifndef SFMT_PARAMS_M19937_H
 #define SFMT_PARAMS_M19937_H

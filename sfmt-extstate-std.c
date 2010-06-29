@@ -1,17 +1,17 @@
 /* This file is a part of sfmt-extstate */
-/* Copyright (C) 2010 Kenji Rikitake. All rights reserved. */
-/* The new BSD License is applied to this software. */
-/* See LICENSE.txt for the further details. */
 
 /** 
- * @file  SFMT.c
- * @brief SIMD oriented Fast Mersenne Twister(SFMT)
+ * @file  sfmt-extstate-std.c
+ * @brief SFMT table manipulation functions for standard C
  *
  * @author Mutsuo Saito (Hiroshima University)
  * @author Makoto Matsumoto (Hiroshima University)
+ * @author Kenji Rikitake
  *
  * Copyright (C) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
  * University. All rights reserved.
+ *
+ * Copyright (C) 2010 Kenji Rikitake. All rights reserved.
  *
  * The new BSD License is applied to this software, see LICENSE.txt
  */

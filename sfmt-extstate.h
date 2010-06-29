@@ -1,19 +1,18 @@
 /* This file is a part of sfmt-extstate */
-/* Copyright (C) 2010 Kenji Rikitake. All rights reserved. */
-/* The new BSD License is applied to this software. */
-/* See LICENSE.txt for the further details. */
 
 /** 
- * @file SFMT.h
+ * @file sfmt-extstate.h
  *
- * @brief SIMD oriented Fast Mersenne Twister(SFMT) pseudorandom
- * number generator
+ * @brief Common header file for sfmt-extstate
  *
  * @author Mutsuo Saito (Hiroshima University)
  * @author Makoto Matsumoto (Hiroshima University)
+ * @author Kenji Rikitake
  *
  * Copyright (C) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
  * University. All rights reserved.
+ *
+ * Copyright (C) 2010 Kenji Rikitake. All rights reserved. 
  *
  * The new BSD License is applied to this software.
  * see LICENSE.txt
