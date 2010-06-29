@@ -99,3 +99,6 @@ test-sse2-M19937: test.c sfmt-extstate.h sfmt-params-M19937.h \
 
 clean:
 	rm -f *.o *~ test-*
+
+doxygen:
+	doxygen Doxyfile
