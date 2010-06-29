@@ -24,6 +24,9 @@ University. All rights reserved.
 The (modified) BSD License is applied to this software, see LICENSE.txt
 =================================================================
 
+* Details of SFMT algorithm is accessible on the Web from:
+  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html
+
 * Tested on FreeBSD/i386 7.3-RELEASE with 
   gcc44 (GCC) 4.4.4 20100427 from the Port lang/gcc44.
 
