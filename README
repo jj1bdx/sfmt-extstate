@@ -51,9 +51,4 @@ allow the programmers to separate the memory regions for the state
 tables when multiple instances of SFMT generators are concurrently
 running.
 
-* TODO
-
- * Documentation (including source code comments) cleanup
-
-[End of README.txt]
-
+[End of README]
