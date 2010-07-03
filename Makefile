@@ -68,7 +68,9 @@ ALL_SSE2_TARGET = ${SSE2_TARGET}
 .PHONY: std-check sse2-check
 
 # for i386 basic testing
-all: std sse2 std-check sse2-check
+# all: std sse2 std-check sse2-check
+
+all: std-check
 
 std: ${STD_TARGET}
 
