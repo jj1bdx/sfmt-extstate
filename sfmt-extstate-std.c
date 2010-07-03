@@ -20,9 +20,9 @@
 #include "sfmt-extstate.h"
 
 /* non-SSE2-specific prototypes */
-inline void rshift128(w128_t *out,  w128_t const *in, int shift);
-inline void lshift128(w128_t *out,  w128_t const *in, int shift);
-inline void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
+void rshift128(w128_t *out,  w128_t const *in, int shift);
+void lshift128(w128_t *out,  w128_t const *in, int shift);
+void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
 			 w128_t *d);
 
 /* public functions for the state tables */
@@ -37,7 +37,7 @@ inline void gen_rand_array(w128_t *array, int size, w128_t *intstate);
  * @param in the 128-bit data to be shifted
  * @param shift the shift value
  */
-inline void rshift128(w128_t *out, w128_t const *in, int shift) {
+void rshift128(w128_t *out, w128_t const *in, int shift) {
     uint64_t th, tl, oh, ol;
 
     th = ((uint64_t)in->u[3] << 32) | ((uint64_t)in->u[2]);
@@ -61,7 +61,7 @@ inline void rshift128(w128_t *out, w128_t const *in, int shift) {
  * @param shift the shift value
  */
 
-inline void lshift128(w128_t *out, w128_t const *in, int shift) {
+void lshift128(w128_t *out, w128_t const *in, int shift) {
     uint64_t th, tl, oh, ol;
 
     th = ((uint64_t)in->u[3] << 32) | ((uint64_t)in->u[2]);
@@ -84,7 +84,7 @@ inline void lshift128(w128_t *out, w128_t const *in, int shift) {
  * @param c a 128-bit part of the internal state array
  * @param d a 128-bit part of the internal state array
  */
-inline void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
+void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
 				w128_t *d) {
     w128_t x;
     w128_t y;
