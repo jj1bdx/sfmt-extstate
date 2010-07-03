@@ -274,11 +274,12 @@ void function_tests(void) {
 
     w128_t a, b, c, d, r;
     int shift;
-    w128_t testtable[N];
-    uint32_t *testtable32;
+    w128_t testtable[N], array[(10000 / 4)];
+    uint32_t *testtable32, *array32;
     int i;
     
     testtable32 = &testtable[0].u[0];
+    array32 = &array[0].u[0];
 
     printf("rshift128()\n");
     a.u[0] = 3440181298;
@@ -517,6 +518,53 @@ void function_tests(void) {
 	    printf("\n");
 	}
 	printf("%u ", testtable32[i]);
+    }
+    printf("\n");
+
+    printf("gen_rand_array() = [1...%d] ", N32);
+    printf("with 10000 32-bit elements\n");
+    for (i = 0; i < N32; i++) {
+	testtable32[i] = i + 1;
+    }
+    gen_rand_array(&array[0], (10000 / 4), &testtable[0]);
+    printf("internal_table:");
+    for (i = 0; i < N32; i++) {
+	if (0 == i % 4) {
+	    printf("\n");
+	}
+	printf("%u ", testtable32[i]);
+    }
+    printf("\n");
+    printf("array:");
+    for (i = 0; i < 10000; i++) {
+	if (0 == i % 4) {
+	    printf("\n");
+	}
+	printf("%u ", array32[i]);
+    }
+    printf("\n");
+
+    printf("\n");
+    printf("gen_rand_array() = [1001...%d] ", 1000+N32);
+    printf("with 1000 32-bit elements\n");
+    for (i = 0; i < N32; i++) {
+	testtable32[i] = i + 1001;
+    }
+    gen_rand_array(&array[0], (1000 / 4), &testtable[0]);
+    printf("internal_table:");
+    for (i = 0; i < N32; i++) {
+	if (0 == i % 4) {
+	    printf("\n");
+	}
+	printf("%u ", testtable32[i]);
+    }
+    printf("\n");
+    printf("array:");
+    for (i = 0; i < 1000; i++) {
+	if (0 == i % 4) {
+	    printf("\n");
+	}
+	printf("%u ", array32[i]);
     }
     printf("\n");
 
