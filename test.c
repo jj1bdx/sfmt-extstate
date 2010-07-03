@@ -48,7 +48,7 @@ static uint64_t array2[10000 / 4][2];
   --------------------------------------*/
 /** the 128-bit internal state array */
 static w128_t sfmt[N];
-/** the 32bit integer pointer to the 128-bit internal state array */
+/** the 32bit integer pointer to the 128-bit internal state arrayp */
 static uint32_t *psfmt32 = &sfmt[0].u[0];
 /** index counter to the 32-bit internal state array */
 static int idx;
@@ -274,6 +274,11 @@ void function_tests(void) {
 
     w128_t a, b, c, d, r;
     int shift;
+    w128_t testtable[N];
+    uint32_t *testtable32;
+    int i;
+    
+    testtable32 = &testtable[0].u[0];
 
     printf("rshift128()\n");
     a.u[0] = 3440181298;
@@ -339,6 +344,7 @@ void function_tests(void) {
     printf("%d %u %u %u %u %u %u %u %u\n",
 	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
 	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    printf("\n");
 
     printf("lshift128()\n");
     a.u[0] = 1721379072;
@@ -404,6 +410,7 @@ void function_tests(void) {
     printf("%d %u %u %u %u %u %u %u %u\n",
 	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
 	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    printf("\n");
 
     printf("do_recursion()\n");
     a.u[0] = 3440181298;
@@ -498,9 +505,22 @@ void function_tests(void) {
 	   c.u[0], c.u[1], c.u[2], c.u[3],
 	   d.u[0], d.u[1], d.u[2], d.u[3],
 	   r.u[0], r.u[1], r.u[2], r.u[3]);
+    printf("\n");
+
+    printf("gen_rand_all() = [1...%d]", N32);
+    for (i = 0; i < N32; i++) {
+	testtable32[i] = i + 1;
+    }
+    gen_rand_all(&testtable[0]);
+    for (i = 0; i < N32; i++) {
+	if (0 == i % 4) {
+	    printf("\n");
+	}
+	printf("%u ", testtable32[i]);
+    }
+    printf("\n");
+
 }
-
-
 
 int main(int argc, char *argv[]) {
     int i;
@@ -517,8 +537,8 @@ int main(int argc, char *argv[]) {
 	    bit32 = 1;
 	}
 	if (strncmp(argv[1],"-p", 2) == 0) {
-	    param = 1;
-	}
+	    param = 1;	
+	}	
 	if (strncmp(argv[1],"-f", 2) == 0) {
 	    functest = 1;
 	}
