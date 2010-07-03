@@ -32,6 +32,7 @@ void fill_array32(uint32_t *array, int size);
 void check32(void);
 void speed32(void);
 void paramdump(void);
+void function_tests(void);
 
 #if defined(HAVE_SSE2)
 static __m128i array1[BLOCK_SIZE / 4];
@@ -54,6 +55,11 @@ static int idx;
 /** a flag: it is 0 if and only if the internal state is not yet
  * initialized. */
 static int initialized = 0;
+
+void rshift128(w128_t *out,  w128_t const *in, int shift);
+void lshift128(w128_t *out,  w128_t const *in, int shift);
+void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c,
+                         w128_t *d);
 
 /**
  * This function generates and returns 32-bit pseudorandom number.
@@ -264,11 +270,150 @@ void paramdump(void) {
     printf("sizeof(sfmt) = %d\n", sizeof(sfmt));
 }
 
+void function_tests(void) {
+
+    w128_t a, b;
+    int shift;
+
+    printf("rshift128()\n");
+    a.u[0] = 3440181298;
+    a.u[1] = 1564997079;
+    a.u[2] = 1510669302;
+    a.u[3] = 2930277156;
+    shift = 1;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 3796268453;
+    a.u[1] = 423124208;
+    a.u[2] = 2143818589;
+    a.u[3] = 3827219408;
+    shift = 2;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 2674978610;
+    a.u[1] = 1536842514;
+    a.u[2] = 2027035537;
+    a.u[3] = 2534897563;
+    shift = 3;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 545368292;
+    a.u[1] = 1489013321;
+    a.u[2] = 1370534252;
+    a.u[3] = 4231012796;
+    shift = 4;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 1764869045;
+    a.u[1] = 824597505;
+    a.u[2] = 862581900;
+    a.u[3] = 2469764249;
+    shift = 5;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 359318673;
+    a.u[1] = 116957936;
+    a.u[2] = 3367389672;
+    a.u[3] = 2327178354;
+    shift = 6;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 3206507879;
+    a.u[1] = 2378925033;
+    a.u[2] = 1040214787;
+    a.u[3] = 2524778605;
+    shift = 7;
+    rshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+
+    printf("lshift128()\n");
+    a.u[0] = 1721379072;
+    a.u[1] = 3897926942;
+    a.u[2] = 1790395498;
+    a.u[3] = 2569178939;
+    shift = 1;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 2340259131;
+    a.u[1] = 3144212906;
+    a.u[2] = 2301169789;
+    a.u[3] = 2442885464;
+    shift = 2;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 3667880593;
+    a.u[1] = 3935928400;
+    a.u[2] = 2372805237;
+    a.u[3] = 1666397115;
+    shift = 3;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 513866770;
+    a.u[1] = 3810869743;
+    a.u[2] = 2147400037;
+    a.u[3] = 2792078025;
+    shift = 4;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 3212265810;
+    a.u[1] = 984692259;
+    a.u[2] = 346590253;
+    a.u[3] = 1804179199;
+    shift = 5;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 750108141;
+    a.u[1] = 2880257022;
+    a.u[2] = 243310542;
+    a.u[3] = 1869036465;
+    shift = 6;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+    a.u[0] = 2983949551;
+    a.u[1] = 1931450364;
+    a.u[2] = 4034505847;
+    a.u[3] = 2735030199;
+    shift = 7;
+    lshift128(&b, &a, shift);
+    printf("%d %u %u %u %u %u %u %u %u\n",
+	   shift, a.u[0], a.u[1], a.u[2], a.u[3],
+	   b.u[0], b.u[1], b.u[2], b.u[3]);
+}
+
+
+
 int main(int argc, char *argv[]) {
     int i;
     int speed = 0;
     int bit32 = 0;
     int param = 0;
+    int functest = 0;
 
     for (i = 1; i < argc; i++) {
 	if (strncmp(argv[1],"-s", 2) == 0) {
@@ -280,9 +425,12 @@ int main(int argc, char *argv[]) {
 	if (strncmp(argv[1],"-p", 2) == 0) {
 	    param = 1;
 	}
+	if (strncmp(argv[1],"-f", 2) == 0) {
+	    functest = 1;
+	}
     }
-    if (speed + bit32 + param == 0) {
-	printf("usage:\n%s [-s | -b32 | -p]\n", argv[0]);
+    if (speed + bit32 + param + functest == 0) {
+	printf("usage:\n%s [-s | -b32 | -p | -f]\n", argv[0]);
 	return 0;
     }
     if (speed) {
@@ -293,6 +441,9 @@ int main(int argc, char *argv[]) {
     }
     if (param) {
 	paramdump();
+    }
+    if (functest) {
+	function_tests();
     }
     return 0;
 }
