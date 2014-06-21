@@ -33,7 +33,7 @@ OPTI = -O3 -finline-functions -fomit-frame-pointer -DNDEBUG \
 #STD = -std=c89 -pedantic
 #STD = -std=c99 -pedantic
 STD = -std=c99
-CC = gcc44
+CC = gcc47
 CCFLAGS = $(OPTI) $(WARN) $(STD)
 SSE2FLAGS = -msse2 -DHAVE_SSE2
 STD_TARGET = test-std-M19937
